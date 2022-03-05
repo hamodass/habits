@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:habit_tracker_application_main/model/choice_model.dart';
 import 'package:habit_tracker_application_main/model/habit_model.dart';
+import 'package:habit_tracker_application_main/model/user_model.dart';
 
 class DataBaseProvider extends ChangeNotifier {
   CollectionReference habitsCollection =
@@ -53,4 +54,7 @@ class DataBaseProvider extends ChangeNotifier {
         .snapshots()
         .map(brewListFromSnapshot);
   }
+
+  
+
 }

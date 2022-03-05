@@ -63,7 +63,9 @@ class _ProfileViewState extends State<ProfileView> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => ProfileEdit(),
+                                  builder: (context) => ProfileEdit(
+                                    currentName: data['name'],
+                                  ),
                                 ),
                               );
                             },
@@ -74,13 +76,18 @@ class _ProfileViewState extends State<ProfileView> {
                                   width: 85,
                                   decoration: BoxDecoration(
                                       color: Colors.grey.shade200,
-                                      shape: BoxShape.circle),
-                                  child: const Center(
-                                    child: Icon(
-                                      Icons.image,
-                                      color: kFullGreenColor,
-                                    ),
-                                  ),
+                                      shape: BoxShape.circle,
+                                      image: DecorationImage(
+                                          image: NetworkImage(data['image']),
+                                          fit: BoxFit.cover)),
+                                  child: data['image'] == null
+                                      ? const Center(
+                                          child: Icon(
+                                            Icons.image,
+                                            color: kFullGreenColor,
+                                          ),
+                                        )
+                                      : Container(),
                                 ),
                                 Positioned(
                                   right: 0,

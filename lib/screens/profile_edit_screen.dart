@@ -1,17 +1,23 @@
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:habit_tracker_application_main/provider/firebase_services.dart';
 import 'package:habit_tracker_application_main/screens/main%20screens/overview_screen.dart';
 import 'package:habit_tracker_application_main/utilitis/constants.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:habit_tracker_application_main/utilitis/loading.dart';
+import 'package:image_picker/image_picker.dart';
 import 'login_and_register/widget/form_field.dart';
 
 class ProfileEdit extends StatefulWidget {
-  const ProfileEdit({Key? key}) : super(key: key);
+  String? currentName;
+  ProfileEdit({this.currentName, Key? key}) : super(key: key);
 
   @override
   _ProfileEditState createState() => _ProfileEditState();
@@ -22,43 +28,62 @@ class _ProfileEditState extends State<ProfileEdit> {
   var firebaseUser = FirebaseAuth.instance.currentUser;
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   // File _image;
-  final controller = TextEditingController();
-  String? name;
-  dynamic image;
+  TextEditingController? controller;
+  // String? name;
+  XFile? image;
   String? fileName;
+  File? selectedImage;
   //Firebase Services Instance
   final FirebaseServices _firebaseServices = FirebaseServices();
 
   //Image Picker Function
   pickImage() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.image,
-      allowMultiple: false,
-    );
-    if (result != null) {
+    ImagePicker _imagePicker = ImagePicker();
+    image = await _imagePicker.pickImage(source: ImageSource.gallery);
+    if (image == null) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('No Image Selected')));
+    }
+    if (image != null) {
       setState(() {
-        image = result.files.first.bytes;
-        fileName = result.files.first.name;
+        selectedImage = File(image!.path);
       });
-    } else {
-      // ignore: avoid_print
-      print('User Canceld Image');
     }
   }
 
   //Save Image TO Firebase Storage
   saveImageToFirebaseDB() async {
-    // var ref = firebase_storage.FirebaseStorage.instance
-    //     .ref('CategoryImages/$fileName');
+    var ref =
+        firebase_storage.FirebaseStorage.instance.ref('UserImage/$fileName');
 
     try {
-      FirebaseFirestore.instance.collection('UserData').doc(user!.uid).update({
-        // 'image': value,
-        'name': controller.text
+      //save image
+      // File
+      final bytes = await image?.readAsBytes(); // Uint8List
+      final byteData = bytes!.buffer.asByteData(); // ByteData
+      await ref.putData(bytes);
+      //download image url
+      await ref.getDownloadURL().then((value) {
+        if (value.isNotEmpty) {
+          //Save Category with image to firestore DB
+          FirebaseFirestore.instance
+              .collection('UserData')
+              .doc(user!.uid)
+              .update({
+            'image': value,
+          }).then((value) => {});
+        }
+        return value;
       });
     } on FirebaseException catch (e) {
       print(e.toString());
     }
+  }
+
+  @override
+  void initState() {
+    controller = TextEditingController(text: widget.currentName);
+    super.initState();
   }
 
   bool isLoading = false;
@@ -96,20 +121,28 @@ class _ProfileEditState extends State<ProfileEdit> {
                               height: 100,
                             ),
                             GestureDetector(
-                              // onTap: pickImage,
+                              onTap: () async {
+                                await pickImage();
+                              },
                               child: Container(
-                                height: 85,
-                                width: 85,
-                                decoration: BoxDecoration(
+                                  height: 85,
+                                  width: 85,
+                                  decoration: BoxDecoration(
                                     color: Colors.grey.shade200,
-                                    shape: BoxShape.circle),
-                                child: const Center(
-                                  child: Icon(
-                                    Icons.image,
-                                    color: kFullGreenColor,
+                                    shape: BoxShape.circle,
                                   ),
-                                ),
-                              ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(90),
+                                    child: selectedImage != null
+                                        ? Image.file(
+                                            selectedImage!,
+                                            fit: BoxFit.cover,
+                                          )
+                                        : Image.network(
+                                            data['image'],
+                                            fit: BoxFit.cover,
+                                          ),
+                                  )),
                             ),
                             const SizedBox(
                               height: 25,
@@ -127,7 +160,7 @@ class _ProfileEditState extends State<ProfileEdit> {
                               child: FormWidget(
                                 onTap: () {},
                                 controller: controller,
-                                lableText: data['name'] ?? 'Name',
+                                lableText: 'Name',
                                 validator: (val) =>
                                     val.isEmpty ? 'Enter Your Name' : null,
                               ),
@@ -137,19 +170,24 @@ class _ProfileEditState extends State<ProfileEdit> {
                             ),
                             ElevatedButton(
                                 onPressed: () async {
-                                  if (formKey.currentState!.validate()) {
-                                    setState(() {
-                                      isLoading = true;
-                                    });
+                                  setState(() {
+                                    isLoading = true;
+                                  });
 
-                                    await Future.delayed(
-                                        const Duration(seconds: 2));
+                                  if (selectedImage != null) {
                                     await saveImageToFirebaseDB();
-                                    setState(() {
-                                      isLoading = false;
-                                    });
+                                  } else if (controller!.text != null) {
+                                    await FirebaseFirestore.instance
+                                        .collection('UserData')
+                                        .doc(user!.uid)
+                                        .update({
+                                      'name': controller!.text,
+                                    }).then((value) => {});
                                   }
-                                  return;
+
+                                  setState(() {
+                                    isLoading = false;
+                                  });
                                 },
                                 child: const Text(
                                   'Apply Changes',

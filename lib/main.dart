@@ -29,6 +29,7 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           primarySwatch: kcolor,
           primaryColor: kFullGreenColor,
+        
         ),
         home: SpalshScreenPage(),
       ),
