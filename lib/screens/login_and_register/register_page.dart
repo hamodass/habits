@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:habit_tracker_application_main/screens/login_and_register/widget/form_field.dart';
 import 'package:habit_tracker_application_main/services/firebase_auth.dart';
@@ -55,7 +54,7 @@ class _RegisterationPageState extends State<RegisterationPage> {
                             height: 80,
                           ),
                           Image.asset(
-                            'assets/logo/logo.png',
+                            'assets/images/logo.jpg',
                             height: 200,
                             width: 300,
                             fit: BoxFit.cover,

@@ -1,5 +1,6 @@
 import 'dart:ffi';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:habit_tracker_application_main/model/choice_model.dart';
@@ -19,6 +20,7 @@ class ViewHabit extends StatefulWidget {
 class _ViewHabitState extends State<ViewHabit> {
   bool isLoading = false;
   bool isComplted = false;
+  var user = FirebaseAuth.instance.currentUser;
   @override
   // void initState() {
   //   isComplted = widget.habit!.isCompleted!;

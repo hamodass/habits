@@ -23,6 +23,7 @@ class _HabitRatingScreenState extends State<HabitRatingScreen> {
   IconData myFeedback = FontAwesomeIcons.sadTear;
   Color myFeedbackColor = Colors.red;
   TextEditingController? _commentController;
+  var user = FirebaseAuth.instance.currentUser;
   @override
   void initState() {
     _commentController = TextEditingController(text: widget.habit!.comment!);

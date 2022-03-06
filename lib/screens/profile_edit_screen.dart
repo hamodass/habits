@@ -29,6 +29,7 @@ class _ProfileEditState extends State<ProfileEdit> {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   // File _image;
   TextEditingController? controller;
+  var user = FirebaseAuth.instance.currentUser;
   // String? name;
   XFile? image;
   String? fileName;
@@ -65,7 +66,7 @@ class _ProfileEditState extends State<ProfileEdit> {
       //download image url
       await ref.getDownloadURL().then((value) {
         if (value.isNotEmpty) {
-          //Save Category with image to firestore DB
+     
           FirebaseFirestore.instance
               .collection('UserData')
               .doc(user!.uid)

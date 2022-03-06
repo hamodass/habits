@@ -12,7 +12,7 @@ import 'package:habit_tracker_application_main/utilitis/loading.dart';
 
 import 'completed_habits_screen.dart';
 
-var user = FirebaseAuth.instance.currentUser;
+
 
 class OverviewScreen extends StatefulWidget {
   const OverviewScreen({Key? key}) : super(key: key);
@@ -26,6 +26,7 @@ QuerySnapshot? snapshot;
 class _OverviewScreenState extends State<OverviewScreen> {
   bool _noCategorySelected = false;
   HabitModel? _selectedValue;
+  var user = FirebaseAuth.instance.currentUser;
   Widget dropDownMenuWidget(List<HabitModel> habit) {
     return DropdownButton(
         // value: _selectedValue,
